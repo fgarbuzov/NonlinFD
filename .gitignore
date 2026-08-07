@@ -1,0 +1,21 @@
+# Python caches
+__pycache__/
+*.pyc
+
+# Jupyter auto-saves
+.ipynb_checkpoints/
+
+# Pytest cache
+.pytest_cache/
+
+# LAMMPS output files
+*.dump
+*.restart
+log.lammps
+
+# OS files
+.DS_Store
+Thumbs.db
+
+data/
+src_test/

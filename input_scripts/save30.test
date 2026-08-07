@@ -1,0 +1,58 @@
+# Initialization
+units lj
+dimension 3
+boundary p p p
+atom_style atomic
+
+# Create simulation box and atoms
+lattice fcc 1.058 origin 0.05 0.05 0.05
+region simbox block 0 10 0 10 0 10 units lattice
+create_box 1 simbox
+create_atoms 1 box
+mass 1 1.0
+velocity all create 4.0 94673 mom yes
+
+# Potential settings
+pair_style lj/smooth 2.5 3.5
+pair_coeff 1 1 1.0 1.0
+pair_modify shift yes
+
+# Monitoring variables
+variable time equal time
+variable etot equal etotal
+variable vol equal vol
+variable dens equal density
+
+# Default computes
+compute temp all temp
+compute press all pressure thermo_temp
+
+# Born matrix computation
+compute press_pot all pressure NULL virial
+compute born_matrix all born/matrix numdiff 1e-06 press_pot
+
+# Timestep (default 0.005 for lennard-jones)
+timestep 0.002
+
+# Screen and log output
+thermo 5000
+thermo_style custom step temp press etotal
+thermo_modify flush yes
+
+fix nvt_eq all nvt temp 4.0 4.0 0.2
+run 5000
+unfix nvt_eq
+
+# Output values
+fix thermo_output all ave/time 1 1 30 v_time c_thermo_temp v_etot v_vol v_dens &
+    file "/home/fgarbuzov/Documents/lammps_test/data/test/save30_dt0.002/thermo.dat"
+fix press_output all ave/time 1 1 30 v_time c_press[*] &
+    file "/home/fgarbuzov/Documents/lammps_test/data/test/save30_dt0.002/press.dat"
+fix press_pot_output all ave/time 1 1 30 v_time c_press_pot[*] &
+    file "/home/fgarbuzov/Documents/lammps_test/data/test/save30_dt0.002/press_pot.dat"
+fix born_output all ave/time 1 1 30 v_time c_born_matrix[*] &
+    file "/home/fgarbuzov/Documents/lammps_test/data/test/save30_dt0.002/born.dat"
+
+fix nve_prod all nve
+run 500000
+unfix nve_prod

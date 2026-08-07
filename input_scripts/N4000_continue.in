@@ -1,0 +1,35 @@
+read_restart "data/convergence/gpu_dt0.002/snapshot.restart"
+
+# Temperature computation (unnecessary due to internal thermo_temp)
+compute temp all temp
+
+# Monitoring variables
+variable time equal time
+variable etot equal etotal
+variable vol equal vol
+variable dens equal density
+
+# Pressure tensor computation (the vector has length 6)
+compute press all pressure thermo_temp
+
+# Born matrix computation
+compute press_pot all pressure NULL virial
+compute born_matrix all born/matrix numdiff 1.0e-6 press_pot
+#compute born_matrix_nl all born/matrix/nonlinear 1.0e-6 press_pot born_matrix
+
+# Screen and log output
+thermo 10000
+thermo_style custom step temp press density vol etotal
+thermo_modify flush yes
+
+fix thermo_output all ave/time 1 1 200 v_time c_thermo_temp v_etot v_vol v_dens 
+    append "data/convergence/gpu_dt0.001/thermo.dat"
+
+fix press_output all ave/time 1 1 200 v_time c_press[*] 
+    append "data/convergence/gpu_dt0.001/press.dat"
+
+fix nve_prod all nve
+
+run 80000000
+
+write_restart "data/convergence/gpu_dt0.001/snapshot.restart"

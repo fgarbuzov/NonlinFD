@@ -1,0 +1,71 @@
+#package omp 12          # Use 12 OpenMP threads
+#suffix omp              # Use OpenMP accelerated styles
+
+# Initialization
+units lj
+dimension 3
+boundary p p p
+atom_style atomic
+
+# Create simulation box and atoms
+lattice fcc 1.058 origin 0.05 0.05 0.05
+region simbox block 0 20 0 20 0 20 units lattice
+create_box 1 simbox
+create_atoms 1 box
+mass 1 1.0
+velocity all create 4.0 94673 mom yes
+
+# Interaction settings
+pair_style lj/smooth 2.5 3.5
+pair_coeff 1 1 1.0 1.0
+pair_modify shift yes
+
+# Neighbor list settings
+# neighbor 0.3 bin
+# neigh_modify every 1 delay 0 check yes 
+
+# Temperature computation (unnecessary due to internal thermo_temp)
+compute temp all temp
+
+# Monitoring variables
+variable time equal time
+variable etot equal etotal
+variable vol equal vol
+variable dens equal density
+
+# Pressure tensor computation (the vector has length 6)
+compute press all pressure thermo_temp
+
+# Born matrix computation
+compute press_pot all pressure NULL virial
+compute born_matrix all born/matrix numdiff 1.0e-5 press_pot
+#compute born_matrix_nl all born/matrix/nonlinear 1.0e-6 press_pot born_matrix
+
+# Screen and log output
+thermo 1000
+thermo_style custom step temp press density vol etotal
+thermo_modify flush yes
+
+# Timestep (default 0.005 for lennard-jones)
+timestep 0.002
+
+
+#fix nvt_eq all nvt temp 4.0 4.0 0.2
+#run 5000
+#unfix nvt_eq                    
+
+
+fix nve_prod all nve
+
+# Output the the desired values every 100 steps
+#fix thermo_output all ave/time 1 1 100     v_time c_thermo_temp v_etot v_vol v_dens file "data/convergence/test_dt0.002/thermo.dat"
+#fix press_output all ave/time 1 1 100     v_time c_press[*] file "data/convergence/test_dt0.002/press.dat"
+#fix press_pot_output all ave/time 1 1 100     v_time c_press_pot[*] file "data/convergence/test_dt0.002/press_pot.dat"
+#fix born_output all ave/time 1 1 100     v_time c_born_matrix[*] file "data/convergence/test_dt0.002/born.dat"
+#fix born_nl_output all ave/time 1 1 100     v_time c_born_matrix_nl[*] file "data/convergence/test_dt0.002/born_nl.dat"          
+
+run 10000
+
+#unfix born_nl_output
+
+#run 10000
