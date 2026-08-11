@@ -1,0 +1,69 @@
+# Initialization
+units lj
+dimension 3
+boundary p p p
+atom_style atomic
+
+# Create simulation box and atoms
+lattice fcc 1.058 origin 0.05 0.05 0.05
+region simbox block 0 10 0 10 0 10 units lattice
+create_box 1 simbox
+create_atoms 1 box
+mass 1 1.0
+velocity all create 4.0 94673 mom yes
+
+# Potential settings
+pair_style lj/smooth 2.5 3.5
+pair_coeff 1 1 1.0 1.0
+pair_modify shift yes
+
+# Monitoring variables
+variable time equal time
+variable etot equal etotal
+variable vol equal vol
+variable dens equal density
+
+# Default computes
+compute temp all temp
+compute press all pressure thermo_temp
+
+# Timestep (default 0.005 for lennard-jones)
+timestep 0.001
+
+# Screen and log output
+thermo 10000
+thermo_style custom step temp press etotal
+thermo_modify flush yes
+
+fix nvt_eq all nvt temp 4.0 4.0 0.1
+run 10000
+unfix nvt_eq
+
+# Output values
+fix thermo_output all ave/time 1 1 1 v_time c_thermo_temp v_etot v_vol v_dens &
+    file "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nvt/dt0.001/thermo.dat"
+fix press_output all ave/time 1 1 1 v_time c_press[*] &
+    file "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nvt/dt0.001/press.dat"
+
+fix nvt_prod all nvt temp 4.0 4.0 0.1
+
+variable Lx0 equal lx
+run 0
+variable Lx0_saved equal ${Lx0}
+variable run_wait equal 2000
+
+run ${run_wait}
+
+variable i loop 1000
+label loop_start
+
+print "Cycle ${i}"
+change_box all x scale 1.005 remap
+run ${run_wait}
+change_box all x final 0 ${Lx0_saved} remap units box
+run ${run_wait}
+
+next i
+jump SELF loop_start
+
+write_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nvt/dt0.001/snapshot_1k_loops.restart"

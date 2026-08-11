@@ -28,35 +28,50 @@ compute temp all temp
 compute press all pressure thermo_temp
 
 # Timestep (default 0.005 for lennard-jones)
-timestep 0.002
+timestep 0.001
 
 # Screen and log output
 thermo 10000
 thermo_style custom step temp press etotal
 thermo_modify flush yes
 
-fix nvt_eq all nvt temp 4.0 4.0 0.2
+fix nvt_eq all nvt temp 4.0 4.0 0.1
 run 10000
 unfix nvt_eq
 
 # Output values
-fix thermo_output all ave/time 1 1 2 v_time c_thermo_temp v_etot v_vol v_dens &
-    file "/home/fgarbuzov/Documents/lammps_test/data/strains/gpu_dt0.002/thermo.dat"
-fix press_output all ave/time 1 1 2 v_time c_press[*] &
-    file "/home/fgarbuzov/Documents/lammps_test/data/strains/gpu_dt0.002/press.dat"
+fix thermo_output all ave/time 1 1 1 v_time c_thermo_temp v_etot v_vol v_dens &
+    file "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001/thermo.dat"
+fix press_output all ave/time 1 1 1 v_time c_press[*] &
+    file "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001/press.dat"
 
 fix nve_prod all nve
 
 variable Lx0 equal lx
+run 0
+variable Lx0_saved equal ${Lx0}
+variable run_wait equal 500
+variable run_eq equal 2000
 
-variable i loop 10
+run ${run_wait}
+unfix nve_prod
+
+variable i loop 1000
 label loop_start
 
+fix nve_prod all nve
 print "Cycle ${i}"
-run 10000
-change_box all x scale 1.001 remap
-run 10000
-change_box all x final 0 ${Lx0} remap units box
+change_box all x scale 1.005 remap
+run ${run_wait}
+change_box all x final 0 ${Lx0_saved} remap units box
+run ${run_wait}
+unfix nve_prod
+
+fix nvt_prod all nvt temp 4.0 4.0 0.1
+run ${run_eq}
+unfix nvt_prod
 
 next i
 jump SELF loop_start
+
+write_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001/snapshot_1k_loops.restart"

@@ -100,6 +100,7 @@ class Data:
             V = thermo_data.vol.mean()
             result['V'] = V
             result['T'] = thermo_data.temp.mean()
+            result['time'] = thermo_data.time
 
         scale = self.get_scale()
         if FileKeys.PRESS.value in dfs.keys():
@@ -112,19 +113,21 @@ class Data:
             
         if (FileKeys.PRESS_POT.value in dfs.keys() 
             and FileKeys.BORN.value in dfs.keys()):
-            
+
             press_pot_data = dfs[FileKeys.PRESS_POT.value]
+            born_len = min(born_len, len(press_pot_data)) if born_len else len(press_pot_data)
             press_pot_raw = np.array(press_pot_data.iloc[:born_len,2:]) * scale
             press_kin_raw = press_raw[:born_len] - press_pot_raw
             stress_kin = -lammps_array_to_matrix(press_kin_raw)
             stress_kin_mean = stress_kin.mean(axis=0)
     
             born_data = dfs[FileKeys.BORN.value]
+            born_len = min(born_len, len(born_data))
             born_raw = np.array(born_data.iloc[:born_len,2:]) * scale / V
             born_voigt = lammps_array_to_matrix(born_raw)
             CB = voigt_to_tensor(born_voigt)
             CB_avg = CB.mean(axis=0)
-            CBK = CB - 4 * sym_dyad(np.eye(3), stress_kin)
+            CBK = CB - 4 * sym_dyad(np.eye(3), stress_kin[:born_len])
             CBK_avg = CBK.mean(axis=0)
             result['CBK'] = CBK
             result['CBK_avg'] = CBK_avg
