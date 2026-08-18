@@ -4,6 +4,14 @@ from .read_write import FILES
 class ScriptGenLJ:
     def __init__(self, savedir):
         self.path = Path(savedir)
+
+    def log(self, custom_path=None, append=False):
+        if custom_path == None:
+            custom_path = f"{self.path / 'sim.log'}"
+        res = f"log {custom_path} "
+        if append:
+            res += "append"
+        return res + "\n"
         
     def init_box_atoms(self, rho=1.058, L=10, T=4.0, seed=94673, offset = 0.05,
                        Rin=2.5, Rc=3.5, eps=1.0, sigma=1.0):
