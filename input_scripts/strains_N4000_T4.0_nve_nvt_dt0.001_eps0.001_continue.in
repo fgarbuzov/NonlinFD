@@ -1,6 +1,6 @@
 log /home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001_eps0.001/sim.log append
 
-read_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001_eps0.001/snapshot_2k_loops.restart"
+read_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001_eps0.001/snapshot_4k_loops.restart"
 
 # Monitoring variables
 variable time equal time
@@ -34,7 +34,7 @@ variable Lx0_saved equal ${Lx0}
 variable run_wait equal 500
 variable xscale equal 1.001
 
-variable i loop 2000
+variable i loop 4000
 label loop_start
 
 print "Cycle ${i}"
@@ -53,4 +53,4 @@ fix nve_prod all nve
 next i
 jump SELF loop_start
 
-write_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001_eps0.001/snapshot_4k_loops.restart"
+write_restart "/home/fgarbuzov/Documents/lammps_test/data/strains/N4000/T4.0_nve_nvt/dt0.001_eps0.001/snapshot_8k_loops.restart"
