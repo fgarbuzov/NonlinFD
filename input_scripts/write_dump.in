@@ -1,0 +1,9 @@
+read_restart "/home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/snapshot_1M.restart"
+
+# Timestep (default 0.005 for lennard-jones)
+timestep 0.005
+
+fix nve_prod all nve
+run 0
+
+write_dump all custom snapshot.lammpstrj id type x y z

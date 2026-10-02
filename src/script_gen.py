@@ -60,8 +60,8 @@ compute press_pot all pressure NULL virial
 compute born_matrix all born/matrix numdiff {numdiff} press_pot
 """
             if comp_born_nl:
-                script += f"compute born_matrix_nl all born/matrix/nonlinear \
-                    {numdiff} press_pot born_matrix"
+                script += f"""compute born_matrix_nl all born/matrix/nonlinear {numdiff} press_pot born_matrix
+"""
         return script
 
     def time_step_log(self, time_step=0.005, thermo_log_steps=5000):

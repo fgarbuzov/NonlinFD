@@ -12,6 +12,11 @@ __pycache__/
 *.dump
 *.restart
 log.lammps
+sim.log
+*.lammpstrj
+
+# local scripts
+start_jupyter.sh
 
 # OS files
 .DS_Store

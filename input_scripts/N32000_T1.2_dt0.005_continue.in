@@ -1,0 +1,36 @@
+log /home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/sim.log append
+
+read_restart "/home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/snapshot_6M.restart"
+
+# Monitoring variables
+variable time equal time
+variable etot equal etotal
+variable vol equal vol
+variable dens equal density
+
+# Default computes
+compute temp all temp
+compute press all pressure thermo_temp
+
+# Born matrix computation
+compute press_pot all pressure NULL virial
+compute born_matrix all born/matrix numdiff 1e-06 press_pot
+
+# Timestep (default 0.005 for lennard-jones)
+timestep 0.005
+
+# Screen and log output
+thermo 10000
+thermo_style custom step temp press etotal
+thermo_modify flush yes
+
+# Output values
+fix thermo_output all ave/time 1 1 4 v_time c_thermo_temp v_etot v_vol v_dens &
+    append "/home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/thermo.dat"
+fix press_output all ave/time 1 1 4 v_time c_press[*] &
+    append "/home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/press.dat"
+
+fix nve_prod all nve 
+run 4000000
+
+write_restart "/home/fgarbuzov/Documents/lammps_test/data/convergence/N32000/T1.2/dt0.005/snapshot_10M.restart"
